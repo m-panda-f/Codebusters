@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <title>CGPA Calculator</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f49b9b;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 10px 14px 40px rgba(0, 0, 0, 0.7); /* Specify horizontal and vertical offsets */
+            padding: 50px;
+            width: 400px;
+            text-align: center;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+        #appreciationMessage {
+            font-size: 18px;
+            color: #007bff;
+            margin-top: 20px;
+        }
+
+        .animated {
+            animation-duration: 1s;
+        }
+
+        .heartBeat {
+            animation-name: heartBeat;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        input, button {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #006f06;
+        }
+
+        #cgpaResult {
+            font-size: 20px;
+            color: #383636;
+            margin-top: 20px;
+        }
+
+        #semesterInputs {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        #semesterInputs table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        #semesterInputs th, #semesterInputs td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        #semesterInputs th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CGPA Calculator</h1>
+        
+        <form id="cgpaForm">
+            <label for="numSemesters">Number of Semesters:</label>
+            <input type="number" id="numSemesters" required>
+            
+            <div id="semesterInputs"></div>
+            
+            <div id="cgpaResult"></div>
+            <div id="appreciationMessage"></div>
+            <button type="button" onclick="calculateCGPA()">Calculate CGPA</button>
+        </form>
+        
+    </div>
+
+    <script>
+        function generateSemesterInputs() {
+            const numSemesters = document.getElementById('numSemesters').value;
+            const semesterInputsDiv = document.getElementById('semesterInputs');
+            semesterInputsDiv.innerHTML = ''; // Clear previous inputs
+
+            for (let i = 1; i <= numSemesters; i++) {
+                const sgpaLabel = document.createElement('label');
+                sgpaLabel.textContent = `SGPA of Semester ${i}:`;
+                const sgpaInput = document.createElement('input');
+                sgpaInput.step = '0.01';
+                sgpaInput.name = `sgpa${i}`;
+                sgpaInput.required = true;
+                sgpaInput.addEventListener('keyup', handleEnterKey);
+
+                const creditsLabel = document.createElement('label');
+                creditsLabel.textContent = `Total Credits for ${i} Semester :`;
+                const creditsInput = document.createElement('input');
+                creditsInput.name = `totalCredits${i}`;
+                creditsInput.required = true;
+                creditsInput.addEventListener('keyup', handleEnterKey);
+
+                semesterInputsDiv.appendChild(sgpaLabel);
+                semesterInputsDiv.appendChild(sgpaInput);
+                semesterInputsDiv.appendChild(creditsLabel);
+                semesterInputsDiv.appendChild(creditsInput);
+            }
+        }
+
+        function handleEnterKey(event) {
+            if (event.key === 'Enter') {
+                const form = document.getElementById('cgpaForm');
+                const inputs = Array.from(form.elements);
+                const index = inputs.indexOf(event.target);
+                
+                if (index !== -1 && index + 1 < inputs.length) {
+                    inputs[index + 1].focus();
+                } else {
+                    // Calculate CGPA when the last input is reached
+                    calculateCGPA();
+                }
+            }
+        }
+
+        function calculateCGPA() {
+            const numSemesters = document.getElementById('numSemesters').value;
+            let totalSemesterCredits = 0;
+            let totalGradeCredits = 0;
+
+            for (let i = 1; i <= numSemesters; i++) {
+                const sgpa = parseFloat(document.getElementsByName(`sgpa${i}`)[0].value);
+                const totalCredits = parseFloat(document.getElementsByName(`totalCredits${i}`)[0].value);
+
+                const semesterGradeCredits = sgpa * totalCredits;
+
+                totalGradeCredits += semesterGradeCredits;
+                totalSemesterCredits += totalCredits;
+            }
+
+            const cgpa = totalGradeCredits / totalSemesterCredits;
+
+            const cgpaResultDiv = document.getElementById('cgpaResult');
+            cgpaResultDiv.textContent = `Your CGPA is: ${cgpa.toFixed(2)}`;
+
+            // Display appreciation message with cute animation if CGPA is 8 or above
+            const appreciationMessage = document.getElementById('appreciationMessage');
+            appreciationMessage.textContent = ''; // Clear previous message
+
+            if (cgpa >= 8) {
+                appreciationMessage.textContent = 'Congratulations! Excellent Overall Performance!';
+                appreciationMessage.style.display = 'block';
+                appreciationMessage.classList.add('animated', 'heartBeat');
+
+                // Remove the animation classes after the animation completes
+                setTimeout(() => {
+                    appreciationMessage.classList.remove('animated', 'heartBeat');
+                }, 1000);
+            }
+        }
+
+        document.getElementById('numSemesters').addEventListener('input', generateSemesterInputs);
+    </script>
+</body>
+</html>
