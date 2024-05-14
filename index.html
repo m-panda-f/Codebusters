@@ -117,36 +117,41 @@
         </form>
         
     </div>
-
     <script>
         function generateSemesterInputs() {
             const numSemesters = document.getElementById('numSemesters').value;
             const semesterInputsDiv = document.getElementById('semesterInputs');
             semesterInputsDiv.innerHTML = ''; // Clear previous inputs
-
+        
+            // Check if the number of semesters is valid
+            if (numSemesters < 0 || numSemesters > 8) {
+                alert('Please enter a valid number of semesters (1 to 8).');
+                return numSemesters = 0;
+            }
+        
             for (let i = 1; i <= numSemesters; i++) {
                 const sgpaLabel = document.createElement('label');
-                sgpaLabel.textContent = `SGPA of Semester ${i}:`;
+                sgpaLabel.textContent = `SGPA of Semester ${i}: *`;
                 const sgpaInput = document.createElement('input');
                 sgpaInput.step = '0.01';
                 sgpaInput.name = `sgpa${i}`;
                 sgpaInput.required = true;
                 sgpaInput.addEventListener('keyup', handleEnterKey);
-
+        
                 const creditsLabel = document.createElement('label');
                 creditsLabel.textContent = `Total Credits for ${i} Semester :`;
                 const creditsInput = document.createElement('input');
                 creditsInput.name = `totalCredits${i}`;
                 creditsInput.required = true;
                 creditsInput.addEventListener('keyup', handleEnterKey);
-
+        
                 semesterInputsDiv.appendChild(sgpaLabel);
                 semesterInputsDiv.appendChild(sgpaInput);
                 semesterInputsDiv.appendChild(creditsLabel);
                 semesterInputsDiv.appendChild(creditsInput);
             }
         }
-
+        
         function handleEnterKey(event) {
             if (event.key === 'Enter') {
                 const form = document.getElementById('cgpaForm');
@@ -161,44 +166,54 @@
                 }
             }
         }
-
+        
         function calculateCGPA() {
             const numSemesters = document.getElementById('numSemesters').value;
             let totalSemesterCredits = 0;
             let totalGradeCredits = 0;
-
+        
             for (let i = 1; i <= numSemesters; i++) {
-                const sgpa = parseFloat(document.getElementsByName(`sgpa${i}`)[0].value);
-                const totalCredits = parseFloat(document.getElementsByName(`totalCredits${i}`)[0].value);
-
+                const sgpaInput = document.getElementsByName(`sgpa${i}`)[0];
+                const creditsInput = document.getElementsByName(`totalCredits${i}`)[0];
+        
+                // Validate SGPA and total credits
+                const sgpa = parseFloat(sgpaInput.value);
+                const totalCredits = parseFloat(creditsInput.value);
+        
+                if (isNaN(sgpa) || isNaN(totalCredits) || sgpa < 0 || totalCredits < 0 || sgpa > 10) {
+                    alert('Please enter valid SGPA (0 to 10) and Total Credits (non-negative) for all semesters.');
+                    return;
+                }
+        
                 const semesterGradeCredits = sgpa * totalCredits;
-
+        
                 totalGradeCredits += semesterGradeCredits;
                 totalSemesterCredits += totalCredits;
             }
-
+        
             const cgpa = totalGradeCredits / totalSemesterCredits;
-
+        
             const cgpaResultDiv = document.getElementById('cgpaResult');
             cgpaResultDiv.textContent = `Your CGPA is: ${cgpa.toFixed(2)}`;
-
+        
             // Display appreciation message with cute animation if CGPA is 8 or above
             const appreciationMessage = document.getElementById('appreciationMessage');
             appreciationMessage.textContent = ''; // Clear previous message
-
+        
             if (cgpa >= 8) {
                 appreciationMessage.textContent = 'Congratulations! Excellent Overall Performance!';
                 appreciationMessage.style.display = 'block';
                 appreciationMessage.classList.add('animated', 'heartBeat');
-
+        
                 // Remove the animation classes after the animation completes
                 setTimeout(() => {
                     appreciationMessage.classList.remove('animated', 'heartBeat');
                 }, 1000);
             }
         }
-
+        
         document.getElementById('numSemesters').addEventListener('input', generateSemesterInputs);
-    </script>
+        
+       </script>
 </body>
 </html>
